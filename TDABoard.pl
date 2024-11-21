@@ -1,89 +1,125 @@
-board([[], 
-	[], 
-	[], 
-	[], 
-	[], 
-	[], 
-	[]]).
+% Tablero de prueba
+board([[0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0],
+       [yellow, 0, 0, 0, 0, 0],
+       [yellow, 0, 0, 0, 0, 0],
+       [yellow, 0, 0, 0, 0, 0]]).
 
+% ---------------------------------------------------------------------
 % can_play(Board)
-% Verifica si alguna columna tiene menos de 6 elementos.
+% Verifica si alguna columna contiene un 0 (espacio vacío).
 can_play(Board) :-
-    member(Column, Board),              
-    is_list(Column),                     
-    count_elements(Column, 0, Count),     
-    Count < 6,
-    !.                                  
+    member(Column, Board),       
+    member(0, Column),            
+    !.                           
 
-% count_elements(List, Acc, Count)
-% Cuenta los elementos de una lista manualmente.
-count_elements([], Count, Count).        
-count_elements([_|Tail], Acc, Count) :-   
-    NewAcc is Acc + 1,
-    count_elements(Tail, NewAcc, Count).
+% ---------------------------------------------------------------------
+
+play_piece(Board, ColumnIndex, Piece, NewBoard) :-
+    reverse(Board, ReversedBoard),                   
+    place_in_column(ReversedBoard, ColumnIndex, Piece, NewReversedBoard),
+    reverse(NewReversedBoard, NewBoard).                 
 
 
+place_in_column([Row|RestRows], ColumnIndex, Piece, [NewRow|RestRows]) :-
+    nth0(ColumnIndex, Row, 0),                          
+    replace_in_list(Row, ColumnIndex, Piece, NewRow).   
+place_in_column([Row|RestRows], ColumnIndex, Piece, [Row|NewRestRows]) :-
+    place_in_column(RestRows, ColumnIndex, Piece, NewRestRows).
 
 
-% play_piece(EmptyBoard, Column, Piece, NewBoard)
+replace_in_list([_|Tail], 0, Element, [Element|Tail]).
+replace_in_list([Head|Tail], Index, Element, [Head|NewTail]) :-
+    Index > 0,
+    NewIndex is Index - 1,
+    replace_in_list(Tail, NewIndex, Element, NewTail).
 
-play_piece(EmptyBoard, Column, Piece, NewBoard) :-
-    nth0(Column, EmptyBoard, ColumnList), 
-    place_piece(ColumnList, Piece, NewColumnList), 
-    replace_column(EmptyBoard, Column, NewColumnList, NewBoard). 
-
-% place_piece(ColumnList, Piece, NewColumnList)
-% Coloca la ficha en la posición más baja disponible de la columna.
-place_piece(ColumnList, Piece, NewColumnList) :-
-    length(ColumnList, Length),  
-    Length < 6,
-    append(ColumnList, [Piece], NewColumnList).
-
-% replace_column(Board, Column, NewColumnList, NewBoard)
-% Reemplaza la columna en el tablero con la nueva columna modificada.
-replace_column([_|Tail], 0, NewColumnList, [NewColumnList|Tail]).
-replace_column([Head|Tail], N, NewColumnList, [Head|NewTail]) :-
-    N > 0,
-    N1 is N - 1,
-    replace_column(Tail, N1, NewColumnList, NewTail).
-
-
-
-% Predicado principal para verificar la victoria vertical
+% ---------------------------------------------------------------------
+% Verifica si hay un ganador vertical revisando directamente las columnas del tablero.
 check_vertical_win(Board, Winner) :-
-    check_columns(Board, Winner).
+    (vertical_win(Board, red, Winner) ; 
+     vertical_win(Board, yellow, Winner)),  
+    !.                                  
+check_vertical_win(_, 0).                
 
-% Recorrer las columnas
-check_columns([Column|_], Winner) :-
-    check_vertical_column(Column, Winner), 
+
+vertical_win(Board, Ficha, Ficha) :-
+    column_index(Board, 0, Ficha, 0).   
+
+column_index(Board, Columna, Ficha, 0) :-
+    Columna < 6,                       
+    extract_column(Board, Columna, Column),
+    check_consecutive(Column, Ficha, 0, Ficha).
+
+
+extract_column([], _, []).
+extract_column([Row|Rest], Columna, [Element|ColumnRest]) :-
+    nth0(Columna, Row, Element),
+    extract_column(Rest, Columna, ColumnRest).
+
+% ---------------------------------------------------------------------
+% Verifica si hay un ganador horizontal en cualquier fila.
+check_horizontal_win(Board, Winner) :-
+    check_rows(Board, Winner).
+
+
+check_rows([Row|_], Winner) :-
+    check_consecutive(Row, 0, 0, Winner),
+    Winner \= 0, !. 
+check_rows([_|Rest], Winner) :-
+    check_rows(Rest, Winner).
+check_rows([], 0).
+
+
+check_consecutive([], _, _, 0). 
+check_consecutive([Piece|Tail], Piece, Count, Winner) :-
+    Piece \= 0,                          
+    NewCount is Count + 1,               
+    (NewCount = 4 -> Winner = Piece ;    
+     check_consecutive(Tail, Piece, NewCount, Winner)).
+check_consecutive([Piece|Tail], _, _, Winner) :-
+    Piece \= 0,                         
+    check_consecutive(Tail, Piece, 1, Winner).
+check_consecutive([_|Tail], _, _, Winner) :-
+    check_consecutive(Tail, 0, 0, Winner).
+
+%----------------------------------------------------
+
+check_diagonal_win(Board, Winner) :-
+    check_diagonal_descending(Board, Winner);
+    check_diagonal_ascending(Board, Winner).
+
+
+check_diagonal_descending(Board, Winner) :-
+    between(0, 2, Row),  
+    between(0, 3, Col),  
+    check_diagonal(Board, Row, Col, 1, Winner). 
+
+check_diagonal_ascending(Board, Winner) :-
+    between(3, 5, Row),  
+    between(0, 3, Col),  
+    check_diagonal(Board, Row, Col, -1, Winner). 
+
+
+check_diagonal(Board, Row, Col, Direction, Winner) :-
+    check_consecutive_in_diagonal(Board, Row, Col, Direction, Winner, 0).
+
+
+check_consecutive_in_diagonal(_, Row, Col, _, Winner, Count) :-
+    Count >= 4,  
     Winner > 0, 
     !.
 
-check_columns([_|Tail], Winner) :-
-    check_columns(Tail, Winner). 
-
-% Verificar si hay 4 fichas consecutivas en una columna
-check_vertical_column([Piece|Tail], Winner) :-
-    check_consecutive([Piece|Tail], Piece, 1, Winner). 
-
-% Contar fichas consecutivas
-check_consecutive([Piece, Piece, Piece, Piece|_], Piece, 4, 1).  
-check_consecutive([Piece, Piece, Piece, Piece|_], OtherPiece, 4, 2) :- 
-    Piece \= OtherPiece.
-
-check_consecutive([Piece|Tail], Piece, Count, Winner) :-
-    Count < 4, 
-    NewCount is Count + 1,
-    check_consecutive(Tail, Piece, NewCount, Winner).
-
-check_consecutive([_|Tail], Piece, 0, Winner) :- 
-
-    check_consecutive(Tail, Piece, 0, Winner).
-
-check_consecutive(_, _, 4, 1).
-check_consecutive(_, _, 4, 2). 
-
-
-
-
+check_consecutive_in_diagonal(Board, Row, Col, Direction, Winner, Count) :-
+    Row >= 0, Row < 6, 
+    Col >= 0, Col < 7,  
+    nth0(Row, Board, Column), 
+    nth0(Col, Column, Piece),  
+    Piece \= 0,  
+    (Count == 0 -> CurrentPiece = Piece; CurrentPiece = Piece),
+    (Piece == CurrentPiece -> NewCount is Count + 1; NewCount = 1),  
+    NewRow is Row + Direction,  
+    NewCol is Col + 1,  
+    check_consecutive_in_diagonal(Board, NewRow, NewCol, Direction, Winner, NewCount). 
 
