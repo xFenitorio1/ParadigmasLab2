@@ -1,10 +1,10 @@
 % Tablero de prueba
 board([[0, 0, 0, 0, 0, 0],
        [0, 0, 0, 0, 0, 0],
-       [0, 0, 0, 0, 0, 0],
-       [yellow, 0, 0, 0, 0, 0],
-       [yellow, 0, 0, 0, 0, 0],
-       [yellow, 0, 0, 0, 0, 0]]).
+       [red, 0, 0, 0, 0, 0],
+       [red, 0, 0, 0, 0, 0],
+       [red, 0, 0, 0, 0, 0],
+       [red, 0, 0, 0, 0, 0]]).
 
 % ---------------------------------------------------------------------
 % can_play(Board)
@@ -41,7 +41,7 @@ check_vertical_win(Board, Winner) :-
     (vertical_win(Board, red, Winner) ; 
      vertical_win(Board, yellow, Winner)),  
     !.                                  
-check_vertical_win(_, 0).                
+                
 
 
 vertical_win(Board, Ficha, Ficha) :-
@@ -85,7 +85,7 @@ check_consecutive([_|Tail], _, _, Winner) :-
     check_consecutive(Tail, 0, 0, Winner).
 
 %----------------------------------------------------
-
+/*
 check_diagonal_win(Board, Winner) :-
     check_diagonal_descending(Board, Winner);
     check_diagonal_ascending(Board, Winner).
@@ -122,4 +122,10 @@ check_consecutive_in_diagonal(Board, Row, Col, Direction, Winner, Count) :-
     NewRow is Row + Direction,  
     NewCol is Col + 1,  
     check_consecutive_in_diagonal(Board, NewRow, NewCol, Direction, Winner, NewCount). 
+*/
+%----------------------------------------------------
 
+who_is_winner(Board, Winner):-
+	check_vertical_win(Board, Winner);
+	check_horizontal_win(Board, Winner).
+	%check_diagonal_win(Board, Winner).
