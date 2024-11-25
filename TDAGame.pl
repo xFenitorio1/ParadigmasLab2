@@ -59,3 +59,34 @@ update_stat([ID, Name, Color, Wins, Losses, Draws, RemainingPieces], 'draw', [ID
     NewDraws is Draws + 1.
 	
 % ---------------------------------------------------------------------
+
+% get_current_player(Game, CurrentPlayer)
+% Obtiene el jugador cuyo turno está en curso.
+get_current_player([_, _, Player1, _, 1], Player1). % Si el turno es del jugador 1.
+get_current_player([_, _, _, Player2, 2], Player2). % Si el turno es del jugador 2.
+
+% ---------------------------------------------------------------------
+
+% game_get_board(Game, Board)
+% Obtiene el tablero actual del juego.
+game_get_board([_, Board, _, _, _], Board).
+
+
+% ---------------------------------------------------------------------
+
+% end_game(Game, EndGame)
+% Finaliza el juego actualizando las estadísticas de los jugadores según el resultado.
+end_game(Game, EndGame) :-
+    Game = [GameID, Board, Player1, Player2, CurrentTurn],  % Extraer componentes del juego.
+    ( who_is_winner(Board, Winner) ->                      % Determinar el ganador.
+        determine_result(Winner, Result)                  % Mapear Winner a un resultado (win_p1, win_p2, draw).
+    ; Result = 'draw'                                      % En caso de empate.
+    ),
+    update_stats(Game, Result, EndGame).                   % Actualizar las estadísticas con el resultado.
+
+% determine_result(Winner, Result)
+% Determina el resultado del juego basado en el ganador.
+determine_result(Player, 'win_p1') :-
+    Player = red.  % Si el ganador es rojo, es victoria para el Jugador 1.
+determine_result(Player, 'win_p2') :-
+    Player = yellow.  % Si el ganador es amarillo, es victoria para el Jugador 2.
