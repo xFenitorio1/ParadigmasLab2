@@ -7,7 +7,7 @@ player(ID, Name, Color, Wins, Losses, Draws, RemainingPieces, [ID, Name, Color, 
 
 % update_stats(Game, Result, UpdatedGame)
 % Actualiza las estadísticas de los jugadores según el resultado del juego.
-update_stats([GameID, Board, Player1, Player2, CurrentTurn], Result, [GameID, Board, UpdatedPlayer1, UpdatedPlayer2, CurrentTurn]) :-
+update_stats([GameID, Board, Player1, Player2, CurrentTurn, History], Result, [GameID, Board, UpdatedPlayer1, UpdatedPlayer2, CurrentTurn, History]) :-
     ( Result = 'win_p1' ->
         update_stat(Player1, 'win', UpdatedPlayer1),
         update_stat(Player2, 'loss', UpdatedPlayer2)
@@ -29,3 +29,5 @@ update_stat([ID, Name, Color, Wins, Losses, Draws, RemainingPieces], 'loss', [ID
 
 update_stat([ID, Name, Color, Wins, Losses, Draws, RemainingPieces], 'draw', [ID, Name, Color, Wins, Losses, NewDraws, RemainingPieces]) :-
     NewDraws is Draws + 1.
+	
+% -----------------------------
