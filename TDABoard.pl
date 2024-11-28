@@ -19,7 +19,8 @@ can_play(Board) :-
 play_piece(Board, ColumnIndex, Piece, NewBoard) :-
     reverse(Board, ReversedBoard),                   
     place_in_column(ReversedBoard, ColumnIndex, Piece, NewReversedBoard),
-    reverse(NewReversedBoard, NewBoard).                 
+    reverse(NewReversedBoard, NewBoard),
+    !.
 
 
 place_in_column([Row|RestRows], ColumnIndex, Piece, [NewRow|RestRows]) :-
@@ -41,7 +42,7 @@ check_vertical_win(Board, Winner) :-
     (vertical_win(Board, red, Winner) ; 
      vertical_win(Board, yellow, Winner)),  
     !.                                  
-                
+check_vertical_win(_, 0).
 
 
 vertical_win(Board, Ficha, Ficha) :-
@@ -85,47 +86,61 @@ check_consecutive([_|Tail], _, _, Winner) :-
     check_consecutive(Tail, 0, 0, Winner).
 
 %----------------------------------------------------
-/*
+
 check_diagonal_win(Board, Winner) :-
-    check_diagonal_descending(Board, Winner);
-    check_diagonal_ascending(Board, Winner).
+    (check_diagonal_descending(Board, Winner) ;
+     check_diagonal_ascending(Board, Winner)), 
+    !.
+
+check_diagonal_win(_, 0).
 
 
 check_diagonal_descending(Board, Winner) :-
-    between(0, 2, Row),  
-    between(0, 3, Col),  
-    check_diagonal(Board, Row, Col, 1, Winner). 
+    between(0, 2, Row),  % Filas iniciales permitidas para descenso.
+    between(0, 3, Col),  % Columnas iniciales permitidas para descenso.
+    check_diagonal(Board, Row, Col, 1, Winner),
+    !.
+
 
 check_diagonal_ascending(Board, Winner) :-
     between(3, 5, Row),  
     between(0, 3, Col),  
-    check_diagonal(Board, Row, Col, -1, Winner). 
+    check_diagonal(Board, Row, Col, -1, Winner),
+    !.
 
 
 check_diagonal(Board, Row, Col, Direction, Winner) :-
-    check_consecutive_in_diagonal(Board, Row, Col, Direction, Winner, 0).
+    check_consecutive_in_diagonal(Board, Row, Col, Direction, 0, none, Winner).
 
 
-check_consecutive_in_diagonal(_, Row, Col, _, Winner, Count) :-
-    Count >= 4,  
-    Winner > 0, 
+check_consecutive_in_diagonal(_, _, _, _, 4, Piece, Piece) :-
+    Piece \= 0, 
     !.
-
-check_consecutive_in_diagonal(Board, Row, Col, Direction, Winner, Count) :-
+	
+check_consecutive_in_diagonal(Board, Row, Col, Direction, Count, CurrentPiece, Winner) :-
     Row >= 0, Row < 6, 
     Col >= 0, Col < 7,  
-    nth0(Row, Board, Column), 
-    nth0(Col, Column, Piece),  
-    Piece \= 0,  
-    (Count == 0 -> CurrentPiece = Piece; CurrentPiece = Piece),
-    (Piece == CurrentPiece -> NewCount is Count + 1; NewCount = 1),  
-    NewRow is Row + Direction,  
-    NewCol is Col + 1,  
-    check_consecutive_in_diagonal(Board, NewRow, NewCol, Direction, Winner, NewCount). 
-*/
+    nth0(Row, Board, RowData), 
+    nth0(Col, RowData, Piece),  .
+    (
+        Piece \= 0, Piece == CurrentPiece ->  
+            NewCount is Count + 1,        
+            NewPiece = CurrentPiece        
+    ;
+        Piece \= 0 ->  
+            NewCount = 1,                 
+            NewPiece = Piece               
+    ;
+        NewCount = 0,                      
+        NewPiece = none                   
+    ),
+    NewRow is Row + Direction, 
+    NewCol is Col + 1,          
+    check_consecutive_in_diagonal(Board, NewRow, NewCol, Direction, NewCount, NewPiece, Winner).
+
 %----------------------------------------------------
 
-who_is_winner(Board, Winner):-
-	check_vertical_win(Board, Winner);
-	check_horizontal_win(Board, Winner).
-	%check_diagonal_win(Board, Winner).
+who_is_winner(Board, Winner) :-
+    (check_vertical_win(Board, Winner), Winner \= 0) ;
+    check_horizontal_win(Board, Winner);
+    (check_diagonal_win(Board, Winner), Winner \= 0).
