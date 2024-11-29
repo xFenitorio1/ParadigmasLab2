@@ -1,4 +1,3 @@
-
 % ---------------------------------------------------------------------
 %TDA de Game
 game(Game, Board, Player1, Player2, CurrentTurn, [Game, Board, Player1, Player2, CurrentTurn, []]).
@@ -6,7 +5,7 @@ game(Game, Board, Player1, Player2, CurrentTurn, [Game, Board, Player1, Player2,
 
 % ---------------------------------------------------------------------
 
-game_history([_, _, _, _, History], History).
+game_history([_, _, _, _, _, History], History).
 
 
 % ---------------------------------------------------------------------
@@ -29,7 +28,7 @@ is_draw(_, false).  % En caso contrario, no es empate.
 % no_pieces_left(Player).
 no_pieces_left([_, _, _, _, _, _, RemainingPieces]) :-
     RemainingPieces = 0.
-
+	
 % ---------------------------------------------------------------------
 
 % get_current_player(Game, CurrentPlayer)
@@ -54,7 +53,7 @@ game_get_board([_, Board, _, _, _, _], Board) :-
 % end_game(Game, EndGame)
 % Finaliza el juego actualizando las estadísticas de los jugadores según el resultado.
 end_game(Game, EndGame) :-
-    Game = [GameID, Board, Player1, Player2, CurrentTurn],  % Extraer componentes del juego.
+    Game = [GameID, Board, Player1, Player2, CurrentTurn, History],  % Extraer componentes del juego.
     ( 
         who_is_winner(Board, Winner), Winner \= 0 ->       % Determinar el ganador (si existe).
         determine_result(Winner, Result)                  % Mapear Winner a un resultado (win_p1, win_p2).
@@ -62,15 +61,17 @@ end_game(Game, EndGame) :-
         Result = 'draw'                                   % En caso de empate.
     ),
 	!,
-    update_stats([GameID, Board, Player1, Player2, CurrentTurn], Result, EndGame). % Actualizar estadísticas.
+    update_stats([GameID, Board, Player1, Player2, CurrentTurn, History], Result, EndGame). % Actualizar estadísticas.
 
 
 % determine_result(Winner, Result)
 % Determina el resultado del juego basado en el ganador.
 determine_result(Player, 'win_p1') :-
-    Player = "red".  % Si el ganador es rojo, es victoria para el Jugador 1.
+    Player = "red",  % Si el ganador es rojo, es victoria para el Jugador 1.
+	!.
 determine_result(Player, 'win_p2') :-
-    Player = "yellow".  % Si el ganador es amarillo, es victoria para el Jugador 2.
+    Player = "yellow",
+	!. % Si el ganador es amarillo, es victoria para el Jugador 2.
 	
 	
 	
@@ -125,9 +126,7 @@ player_play([GameID, Board, Player1, Player2, CurrentTurn, History], Player, Col
                 NewGame = [GameID, UpdatedBoard, Player1, UpdatedPlayer, NextTurn, UpdatedGameWithHistory]
         )
     ).
-
-
-
+	
 player_color([_, _, Color, _, _, _, _], Color).
 
 reduce_pieces([ID, Name, Color, Wins, Losses, Draws, RemainingPieces], [ID, Name, Color, Wins, Losses, Draws, NewRemainingPieces]) :-

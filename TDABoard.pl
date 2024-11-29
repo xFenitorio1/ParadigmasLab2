@@ -38,27 +38,37 @@ replace_in_list([Head|Tail], Index, Element, [Head|NewTail]) :-
 
 % ---------------------------------------------------------------------
 % Verifica si hay un ganador vertical revisando directamente las columnas del tablero.
+% check_vertical_win(Board, Winner)
+% Verifica si hay un ganador vertical en el tablero.
 check_vertical_win(Board, Winner) :-
-    (vertical_win(Board, red, Winner) ; 
-     vertical_win(Board, yellow, Winner)),  
-    !.                                  
-check_vertical_win(_, 0).
+    vertical_win(Board, "red", Winner) ; 
+     vertical_win(Board, "yellow", Winner),  
+    !.  % Detiene la búsqueda si encuentra un ganador.
+check_vertical_win(_, 0).  % Si no hay ganador, devuelve 0.
 
-
+% vertical_win(Board, Ficha, Winner)
+% Verifica si la ficha especificada tiene 4 consecutivos en alguna columna.
 vertical_win(Board, Ficha, Ficha) :-
-    column_index(Board, 0, Ficha, 0).   
+    column_index(Board, 0, Ficha).
 
-column_index(Board, Columna, Ficha, 0) :-
-    Columna < 6,                       
-    extract_column(Board, Columna, Column),
-    check_consecutive(Column, Ficha, 0, Ficha).
+% column_index(Board, Columna, Ficha)
+% Itera sobre las columnas del tablero para buscar 4 consecutivos.
+column_index(Board, Columna, Ficha) :-
+    Columna < 6,  % Solo hay 7 columnas.
+    extract_column(Board, Columna, Column),  % Extrae la columna actual.
+    check_consecutive(Column, Ficha, 0, Ficha),  % Verifica consecutivos.
+    !.  % Detiene si encuentra una coincidencia.
+column_index(Board, Columna, Ficha) :-
+    Columna < 6,
+    NewColumna is Columna + 1,  % Pasa a la siguiente columna.
+    column_index(Board, NewColumna, Ficha).
 
-
+% extract_column(Board, Columna, Column)
+% Extrae la columna Columna del tablero.
 extract_column([], _, []).
 extract_column([Row|Rest], Columna, [Element|ColumnRest]) :-
     nth0(Columna, Row, Element),
     extract_column(Rest, Columna, ColumnRest).
-
 % ---------------------------------------------------------------------
 % Verifica si hay un ganador horizontal en cualquier fila.
 check_horizontal_win(Board, Winner) :-
@@ -121,7 +131,7 @@ check_consecutive_in_diagonal(Board, Row, Col, Direction, Count, CurrentPiece, W
     Row >= 0, Row < 6, 
     Col >= 0, Col < 7,  
     nth0(Row, Board, RowData), 
-    nth0(Col, RowData, Piece),  .
+    nth0(Col, RowData, Piece),
     (
         Piece \= 0, Piece == CurrentPiece ->  
             NewCount is Count + 1,        
