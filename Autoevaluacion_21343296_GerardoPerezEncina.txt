@@ -1,0 +1,26 @@
+Escala:
+1 = Funcionamiento completo
+0,75 = Funcionamiento parcialmente completo, con algunos errores o mal funcionamiento en algunos casos
+0,5 = Funcionamiento a medias, solo sirve para casos concretos
+0,25 = Solo sirve para un caso
+0 = No hace nada o no esta implementada
+
+Autoevaluación sobre las RF
+
+RF2 TDA Player: 1
+RF3 TDA Piece: 1
+RF4 TDA Board: 1
+RF5 can_play: 1
+RF6 play_piece: 1
+RF7 check_vertical_win: 1
+RF8 check_horizontal_win: 1
+RF9 check_diagonal_win: 1
+RF10 who_is_winner: 0,5
+RF11 TDA Game: 1
+RF12 game_history: 1
+RF13 is_draw: 1
+RF14 update_stats: 1
+RF15 get_current_player: 1
+RF16 game_get_board: 1
+RF17 end_game: 1
+RF18 player_play: 0,75
