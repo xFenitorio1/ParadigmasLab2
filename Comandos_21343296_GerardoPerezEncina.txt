@@ -1,0 +1,37 @@
+- Primeramente se crean los jugadores:
+	player(ID, Name, Color, Wins, Losses, Draws, RemainingPieces, [ID, Name, Color, Wins, Losses, Draws, RemainingPieces]).
+Ejemplo:
+	player(1, "Juan", "red", 0, 0, 0, 10, P1),
+	player(2, "Mauricio", "yellow", 0, 0, 0, 10, P2),
+- Se crea un tablero vacio:
+board([[0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0]]).
+Ejemplo:
+	board(EmptyBoard),
+
+- Se crean las piezas:
+	piece(Color, [Color]).
+Ejemplo:
+	piece("red", RedPiece),
+	piece("yellow", YellowPiece),
+
+-Se crea una partida:
+	game(Game, Board, Player1, Player2, CurrentTurn, [Game, Board, Player1, Player2, CurrentTurn, []]).
+Ejemplo:
+	game(1, EmptyBoard, P1, P2, 1, G0),
+
+- Para poner una ficha en el tablero:
+	play_piece(EmptyBoard, Columna, Piece) Las columnas van del 0 al 6
+Ejemplo:
+	play_piece(EmptyBoard, 0, red)
+
+- Para mostrar al jugador actual usted debe:
+	get_current_player(Game, CurrentPlayer)
+
+- Para poder ver el historial usted debe:
+	game_history(Game, History)
+- Para
